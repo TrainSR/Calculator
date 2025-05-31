@@ -1,6 +1,9 @@
 import streamlit as st
 
-st.title("Progress Calculator")
+st.markdown(
+    "<h1 style='text-align: center;'>Progress Calculator</h1>",
+    unsafe_allow_html=True
+)
 
 # Khởi tạo session state
 if 'y' not in st.session_state:
@@ -9,7 +12,6 @@ if 'logs' not in st.session_state:
     st.session_state.logs = []
 if 'stopped' not in st.session_state:
     st.session_state.stopped = False
-
 if st.session_state.y is None:
     y_init = st.number_input("Nhập giá trị ban đầu y", step=1, format="%d", key='y_input')
     if st.button("Bắt đầu"):
@@ -21,29 +23,29 @@ if st.session_state.y is None:
 else:
     if not st.session_state.stopped:
         x = st.number_input("Nhập x", step=1, format="%d", key='x_input')
-    if st.button("Tiếp tục"):
-        if st.session_state.y == 0:
-            st.write("Dừng chương trình: y = 0.")
-            st.session_state.stopped = True
-        else:
-            try:
-                result = 1 - x / st.session_state.y
-                st.session_state.last_result_sign = result  # Lưu dấu result
-                value = abs(result * 100)
-                formatted_number = f"{value:.3f}".rstrip('0').rstrip('.')
-                if result >= 0:
-                    formatted_result = f"− {formatted_number}%"
-                else:
-                    formatted_result = f"+ {formatted_number}%"
-                st.session_state.logs.append(formatted_result)
-                st.session_state.last_result = formatted_result
-            except ZeroDivisionError:
-                st.session_state.logs.append("Lỗi: chia cho 0.")
-                st.session_state.last_result_sign = None
-            st.session_state.y = x
-            if x == 0:
+        if st.button("Tiếp tục"):
+            if st.session_state.y == 0:
+                st.write("Dừng chương trình: y = 0.")
                 st.session_state.stopped = True
-                st.session_state.logs.append("Dừng vòng lặp vì x = 0.")
+            else:
+                try:
+                    result = 1 - x / st.session_state.y
+                    st.session_state.last_result_sign = result  # Lưu dấu result
+                    value = abs(result * 100)
+                    formatted_number = f"{value:.3f}".rstrip('0').rstrip('.')
+                    if result >= 0:
+                        formatted_result = f"− {formatted_number}%"
+                    else:
+                        formatted_result = f"+ {formatted_number}%"
+                    st.session_state.logs.append(formatted_result)
+                    st.session_state.last_result = formatted_result
+                except ZeroDivisionError:
+                    st.session_state.logs.append("Lỗi: chia cho 0.")
+                    st.session_state.last_result_sign = None
+                st.session_state.y = x
+                if x == 0:
+                    st.session_state.stopped = True
+                    st.session_state.logs.append("Dừng vòng lặp vì x = 0.")
 
 # Hiển thị kết quả mới nhất riêng
 if 'last_result' in st.session_state:
