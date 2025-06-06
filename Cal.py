@@ -71,7 +71,7 @@ if st.session_state.logs:
         for entry in reversed(logs_to_show):
             if isinstance(entry, tuple) and len(entry) == 3:
                 x_val, y_val, res = entry
-                st.write(f"{x_val} - {y_val} = {res}")
+                st.write(f"{y_val} → {x_val} = {res}")
             else:
                 st.write(entry)  # fallback nếu là string
 
