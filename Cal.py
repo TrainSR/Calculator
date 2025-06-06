@@ -9,7 +9,7 @@ st.markdown(
 if 'y' not in st.session_state:
     st.session_state.y = None
 if 'logs' not in st.session_state:
-    st.session_state.logs = []
+    st.session_state.logs = []  # Mỗi log là tuple: (x, y, result_str)
 if 'stopped' not in st.session_state:
     st.session_state.stopped = False
 
@@ -37,22 +37,22 @@ if st.session_state.y is not None and not st.session_state.stopped:
         else:
             try:
                 result = 1 - x / st.session_state.y
-                st.session_state.last_result_sign = result  # Lưu dấu result
+                st.session_state.last_result_sign = result
                 value = abs(result * 100)
                 formatted_number = f"{value:.3f}".rstrip('0').rstrip('.')
                 if result >= 0:
                     formatted_result = f"− {formatted_number}%"
                 else:
                     formatted_result = f"+ {formatted_number}%"
-                st.session_state.logs.append(formatted_result)
+                st.session_state.logs.append((x, st.session_state.y, formatted_result))
                 st.session_state.last_result = formatted_result
             except ZeroDivisionError:
-                st.session_state.logs.append("Lỗi: chia cho 0.")
+                st.session_state.logs.append((x, st.session_state.y, "Lỗi: chia cho 0."))
                 st.session_state.last_result_sign = None
             st.session_state.y = x
             if x == 0:
                 st.session_state.stopped = True
-                st.session_state.logs.append("Dừng vòng lặp vì x = 0.")
+                st.session_state.logs.append((x, st.session_state.y, "Dừng vòng lặp vì x = 0."))
 
 # Hiển thị kết quả mới nhất riêng
 if 'last_result' in st.session_state:
@@ -64,19 +64,21 @@ if 'last_result' in st.session_state:
         color = 'color:black'
     st.markdown(f"<span style='{color}'>{st.session_state.last_result}</span>", unsafe_allow_html=True)
 
-# Lịch sử có thể ẩn/hiện và đảo thứ tự (cũ nhất ở dưới)
-if 'logs' in st.session_state and st.session_state.logs:
+# Lịch sử hiển thị theo định dạng x - y = ±xyz%
+if st.session_state.logs:
     with st.expander("History:"):
-        history_logs = st.session_state.logs[:-1] if 'last_result' in st.session_state else st.session_state.logs
-        for line in reversed(history_logs):
-            st.write(line)
+        logs_to_show = st.session_state.logs[:-1] if 'last_result' in st.session_state else st.session_state.logs
+        for entry in reversed(logs_to_show):
+            if isinstance(entry, tuple) and len(entry) == 3:
+                x_val, y_val, res = entry
+                st.write(f"{x_val} - {y_val} = {res}")
+            else:
+                st.write(entry)  # fallback nếu là string
 
-# Nút reset ở cuối trang
+# Reset chương trình
 if st.button("Reset chương trình", key='reset_btn'):
     st.session_state.y = None
     st.session_state.logs = []
     st.session_state.stopped = False
-    if 'last_result' in st.session_state:
-        del st.session_state.last_result
-    if 'last_result_sign' in st.session_state:
-        del st.session_state.last_result_sign
+    st.session_state.pop('last_result', None)
+    st.session_state.pop('last_result_sign', None)
